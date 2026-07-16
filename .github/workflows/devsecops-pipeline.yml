@@ -1,0 +1,41 @@
+name: Ultimate DevSecOps Secure Pipeline
+
+on: [push, pull_request]
+
+jobs:
+  security-and-build:
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1. Code Checkout
+      - name: Checkout Source Code
+        uses: actions/checkout@v4
+
+      # 2. Dockerfile Linting (Hadolint)
+      # Yeh check karta hai ki Dockerfile industry standards ke hisab se bani hai ya nahi
+      - name: Lint Dockerfile
+        uses: hadolint/hadolint-action@v3.1.0
+        with:
+          dockerfile: Dockerfile
+
+      # 3. Docker Image Build
+      - name: Build Docker Image
+        run: |
+          docker build -t secure-app:${{ github.sha }} .
+
+      # 4. Aqua Security Trivy Scan (The Game Changer)
+      # Yeh image ke andar ghus kar purani dependencies aur vulnerabilities scan karega
+      - name: Run Trivy Security Vulnerability Scanner
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: 'secure-app:${{ github.sha }}'
+          format: 'table'
+          exit-code: '1' # Agar CRITICAL bug mila toh pipeline yahi stop ho jayegi
+          ignore-unfixed: true
+          vuln-type: 'os,library'
+          severity: 'CRITICAL,HIGH'
+
+      # 5. Success Notification Simulation
+      - name: Pipeline Status
+        if: success()
+        run: echo "🚀 Success! Image passed all security checks and is ready for production deployment!"
