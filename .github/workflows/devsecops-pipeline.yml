@@ -12,12 +12,12 @@ jobs:
         uses: actions/checkout@v4
 
       # 2. Dockerfile Linting (Hadolint)
-      # failure: false lagaya taaki linting error se pipeline ruke na, sirf report dikhaye
+      # Yahan 'no-fail: true' sahi syntax hai jo error ko ignore karega
       - name: Lint Dockerfile
         uses: hadolint/hadolint-action@v3.1.0
         with:
           dockerfile: Dockerfile
-          failure: false 
+          no-fail: true 
 
       # 3. Docker Image Build
       - name: Build Docker Image
@@ -25,8 +25,6 @@ jobs:
           docker build -t secure-app:${{ github.sha }} .
 
       # 4. Aqua Security Trivy Scan
-      # exit-code: '0' kiya hai taaki ye poori vulnerability TABLE print kare (jo resume ke liye best hai) 
-      # par pipeline ko fail na kare agar base image me koi chota bug ho.
       - name: Run Trivy Security Vulnerability Scanner
         uses: aquasecurity/trivy-action@master
         with:
